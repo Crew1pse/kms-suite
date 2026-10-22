@@ -1,0 +1,2 @@
+cryptography==50.0.2
+kyber-py==1.2.0

@@ -1,0 +1,11 @@
+venv/
+env/
+.env
+__pycache__/
+*.pyc
+certs/*
+!certs/.gitkeep
+db_data/*
+!db_data/.gitkeep
+.idea/
+.vscode/

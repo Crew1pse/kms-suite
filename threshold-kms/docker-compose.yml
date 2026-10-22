@@ -1,0 +1,89 @@
+services:
+  node-1:
+    build: .
+    container_name: kms-node-1
+    environment:
+      - NODE_ID=1
+      - NODE_PORT=8001
+      - K_THRESHOLD=3
+    ports:
+      - "127.0.0.1:8001:8001"
+    volumes:
+      - ./certs/node-1.crt:/app/certs/node.crt:ro
+      - ./certs/node-1.key:/app/certs/node.key:ro
+      - ./certs/ca.crt:/app/certs/ca.crt:ro
+      - ./db_data/node_1:/app/data
+    networks:
+      - kms_net
+
+  node-2:
+    build: .
+    container_name: kms-node-2
+    environment:
+      - NODE_ID=2
+      - NODE_PORT=8002
+      - K_THRESHOLD=3
+    ports:
+      - "127.0.0.1:8002:8002"
+    volumes:
+      - ./certs/node-2.crt:/app/certs/node.crt:ro
+      - ./certs/node-2.key:/app/certs/node.key:ro
+      - ./certs/ca.crt:/app/certs/ca.crt:ro
+      - ./db_data/node_2:/app/data
+    networks:
+      - kms_net
+
+  node-3:
+    build: .
+    container_name: kms-node-3
+    environment:
+      - NODE_ID=3
+      - NODE_PORT=8003
+      - K_THRESHOLD=3
+    ports:
+      - "127.0.0.1:8003:8003"
+    volumes:
+      - ./certs/node-3.crt:/app/certs/node.crt:ro
+      - ./certs/node-3.key:/app/certs/node.key:ro
+      - ./certs/ca.crt:/app/certs/ca.crt:ro
+      - ./db_data/node_3:/app/data
+    networks:
+      - kms_net
+
+  node-4:
+    build: .
+    container_name: kms-node-4
+    environment:
+      - NODE_ID=4
+      - NODE_PORT=8004
+      - K_THRESHOLD=3
+    ports:
+      - "127.0.0.1:8004:8004"
+    volumes:
+      - ./certs/node-4.crt:/app/certs/node.crt:ro
+      - ./certs/node-4.key:/app/certs/node.key:ro
+      - ./certs/ca.crt:/app/certs/ca.crt:ro
+      - ./db_data/node_4:/app/data
+    networks:
+      - kms_net
+
+  node-5:
+    build: .
+    container_name: kms-node-5
+    environment:
+      - NODE_ID=5
+      - NODE_PORT=8005
+      - K_THRESHOLD=3
+    ports:
+      - "127.0.0.1:8005:8005"
+    volumes:
+      - ./certs/node-5.crt:/app/certs/node.crt:ro
+      - ./certs/node-5.key:/app/certs/node.key:ro
+      - ./certs/ca.crt:/app/certs/ca.crt:ro
+      - ./db_data/node_5:/app/data
+    networks:
+      - kms_net
+
+networks:
+  kms_net:
+    driver: bridge

@@ -1,0 +1,38 @@
+# Профили: manual   -> bao-1 (ручной Shamir unseal, demo.py)
+#          auto     -> unsealer + bao-auto (auto-unseal через transit, auto_unseal_demo.py)
+x-bao: &bao
+  image: openbao/openbao:latest     # зафиксируйте конкретную версию (или ghcr.io/openbao/openbao)
+  command: server
+  cap_add: [IPC_LOCK]
+
+services:
+  bao-1:
+    <<: *bao
+    profiles: [manual]
+    container_name: bao-1
+    ports: ["127.0.0.1:8200:8200"]
+    volumes:
+      - ./config/manual:/openbao/config:ro
+      - ./tls:/openbao/tls:ro
+      - ./data/manual:/openbao/file
+      - ./audit:/openbao/logs
+
+  unsealer:
+    <<: *bao
+    profiles: [auto]
+    container_name: bao-unsealer
+    ports: ["127.0.0.1:8210:8200"]
+    volumes:
+      - ./config/unsealer:/openbao/config:ro
+      - ./tls:/openbao/tls:ro
+      - ./data/unsealer:/openbao/file
+
+  bao-auto:
+    <<: *bao
+    profiles: [auto-target]        # стартует скриптом после выдачи токена
+    container_name: bao-auto
+    ports: ["127.0.0.1:8220:8200"]
+    volumes:
+      - ./config/auto:/openbao/config:ro
+      - ./tls:/openbao/tls:ro
+      - ./data/auto:/openbao/file

@@ -1,0 +1,11 @@
+certs/*
+!certs/.gitkeep
+db_data/*
+!db_data/.gitkeep
+__pycache__/
+*.pyc
+tls/
+data/
+audit/
+config/auto/seal.hcl
+.env

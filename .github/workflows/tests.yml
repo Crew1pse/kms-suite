@@ -1,0 +1,17 @@
+name: tests
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - run: pip install -r threshold-kms/requirements.txt -r threshold-kms/tests/requirements-test.txt -r transparency-log/requirements.txt -r threshold-signing/requirements.txt -r e2ee-messenger/requirements.txt -r workload-identity/requirements.txt -r release-guard/requirements.txt -r formal-verification/requirements.txt kyber-py==1.2.0 hypothesis pytest
+      - run: cd transparency-log/tests && python -m pytest -q
+      - run: cd threshold-kms/tests && python -m pytest -q
+      - run: cd threshold-signing/tests && python -m pytest -q
+      - run: cd e2ee-messenger && python -m pytest -q
+      - run: cd workload-identity && python -m pytest -q
+      - run: cd release-guard && python -m pytest -q
+      - run: cd formal-verification && python -m pytest -q

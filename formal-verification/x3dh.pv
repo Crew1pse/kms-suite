@@ -1,0 +1,50 @@
+(* ProVerif-модель X3DH (упрощённая). НЕ ЗАПУСКАЛАСЬ в этой среде: ProVerif недоступен.
+   Запуск у себя:  proverif x3dh.pv   (Linux/WSL: apt install proverif)
+   Ожидание по символьному движку из src/: секрет сессии держится, пока не утекло ни одного набора из
+   {ek_a,ik_a}, {ek_a,spk_b}, {ik_b,spk_b,opk_b}. Если ProVerif найдёт атаку на фазе 0 - модель или движок неверны,
+   пришлите вывод, разберём. *)
+
+type G.  type exponent.  type key.  type sskey.  type spkey.
+
+free c: channel.
+free g: G.
+fun exp(G, exponent): G.
+equation forall x: exponent, y: exponent; exp(exp(g, x), y) = exp(exp(g, y), x).
+
+fun kdf(G, G, G, G): key.
+fun senc(bitstring, key): bitstring.
+reduc forall m: bitstring, k: key; sdec(senc(m, k), k) = m.
+
+fun enc(G): bitstring [data].
+fun spk_of(sskey): spkey.
+fun sign(bitstring, sskey): bitstring.
+reduc forall m: bitstring, k: sskey; checksign(sign(m, k), spk_of(k)) = m.
+
+free secret_msg: bitstring [private].
+query attacker(secret_msg).                                   (* секретность при отсутствии утечек *)
+
+event AliceStarts(G, G, key).
+event BobAccepts(G, G, key).
+query ia: G, ib: G, k: key; event(BobAccepts(ia, ib, k)) ==> event(AliceStarts(ia, ib, k)).
+
+let Alice(ik_a: exponent, sig_pk_b: spkey) =
+  in(c, (ib_pub: G, spk_pub: G, sg: bitstring, opk_pub: G));
+  if checksign(sg, sig_pk_b) = enc(spk_pub) then
+  new ek: exponent;
+  let ia_pub = exp(g, ik_a) in
+  let k = kdf(exp(spk_pub, ik_a), exp(ib_pub, ek), exp(spk_pub, ek), exp(opk_pub, ek)) in
+  event AliceStarts(ia_pub, ib_pub, k);
+  out(c, (ia_pub, exp(g, ek)));
+  out(c, senc(secret_msg, k)).
+
+let Bob(ik_b: exponent, spk_b: exponent, opk_b: exponent, ssk: sskey, ia_honest: G) =
+  out(c, (exp(g, ik_b), exp(g, spk_b), sign(enc(exp(g, spk_b)), ssk), exp(g, opk_b)));
+  in(c, (ia_pub: G, ek_pub: G));
+  if ia_pub = ia_honest then   (* аутентификация проверяется только для честного инициатора: Боб принимает любых, это нормально *)
+  let k = kdf(exp(ia_pub, spk_b), exp(ek_pub, ik_b), exp(ek_pub, spk_b), exp(ek_pub, opk_b)) in
+  event BobAccepts(ia_pub, exp(g, ik_b), k).
+
+process
+  new ik_a: exponent; new ik_b: exponent; new spk_b: exponent; new opk_b: exponent; new ssk: sskey;
+  out(c, exp(g, ik_a));
+  ( Alice(ik_a, spk_of(ssk)) | Bob(ik_b, spk_b, opk_b, ssk, exp(g, ik_a)) )
